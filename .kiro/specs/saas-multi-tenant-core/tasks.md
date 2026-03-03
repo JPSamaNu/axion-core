@@ -1,0 +1,271 @@
+# Plan de Implementación: Core Multi-Tenant SaaS
+
+## Visión General
+
+Implementación incremental del núcleo SaaS multi-tenant con arquitectura hexagonal. Se comienza por el paquete compartido de tipos, luego la capa de dominio, aplicación e infraestructura del backend, y finalmente el frontend. Cada paso construye sobre el anterior.
+
+## Tareas
+
+- [x] 1. Configurar monorepo y paquete compartido core-types
+  - [x] 1.1 Configurar estructura del monorepo con workspaces
+    - Crear `package.json` raíz con workspaces para `apps/*` y `packages/*`
+    - Configurar `tsconfig.json` base en `packages/ts-config`
+    - Configurar ESLint base en `packages/eslint-config`
+    - _Requisitos: 8.6, 8.7_
+  - [x] 1.2 Implementar paquete `@core/types` con enums y contratos
+    - Crear enums: `Action`, `PermissionScope`, `SystemModule`, `TenantStatus`, `UserStatus`, `RoleScope`
+    - Crear interfaces de contratos de API: `LoginRequest`, `LoginResponse`, `RefreshRequest`, `RefreshResponse`
+    - Crear DTOs compartidos: `UserDto`, `CreateUserRequest`, `RoleDto`, `PermissionDto`
+    - Crear tipos de Domain Events: `DomainEventPayload`, `UserCreatedPayload`, `RoleAssignedPayload`, `ModuleToggledPayload`
+    - Crear barrel export en `index.ts`
+    - _Requisitos: 8.1, 8.2, 8.3, 8.4, 8.5_
+
+- [x] 2. Implementar capa de dominio del backend
+  - [x] 2.1 Crear entidades base y value objects
+    - Implementar `BaseEntity`, `AuditableEntity`, `TenantAwareEntity`
+    - Implementar value objects: `TenantId`, `Email`, `PermissionSpec`
+    - Implementar errores de dominio: `DomainError`, `EntityNotFoundError`, `TenantMismatchError`, `InvalidCredentialsError`, `ModuleInactiveError`, `InsufficientPermissionsError`
+    - _Requisitos: 1.2, 7.1_
+
+  - [x] 2.2 Crear entidades de dominio
+    - Implementar `Tenant`, `User`, `Role`, `Permission`, `UserRole`, `RolePermission`, `Module`, `TenantModule`, `RefreshToken`
+    - Todas las entidades tenant-aware deben extender `TenantAwareEntity`
+    - _Requisitos: 2.1, 3.1, 3.2, 3.3, 4.1, 4.2, 5.1_
+  - [x] 2.3 Crear interfaces de repositorio (puertos)
+    - Implementar `IBaseRepository<T>` con métodos: `findById`, `findAll`, `save`, `softDelete`
+    - Implementar `IUserRepository`, `IRoleRepository`, `ITenantRepository`, `IRefreshTokenRepository`, `IModuleRepository`
+    - _Requisitos: 1.6, 2.4, 10.3_
+  - [x] 2.4 Crear sistema de Domain Events
+    - Implementar clase base `DomainEvent` con `eventId`, `eventType`, `occurredAt`, `aggregateId`, `payload` y método `toJSON()`
+    - Implementar eventos concretos: `UserCreatedEvent`, `RoleAssignedEvent`, `ModuleToggledEvent`
+    - Implementar interfaz `IEventDispatcher` y `IEventHandler` como puertos
+    - _Requisitos: 6.1, 6.6, 6.7_
+  - [x]* 2.5 Tests de propiedades para Domain Events
+    - **Propiedad 12: Serialización round-trip de Domain Events**
+    - **Valida: Requisito 6.7**
+  - [x] 2.6 Crear servicio de dominio PermissionEvaluator
+    - Implementar `IPermissionEvaluator` con lógica de evaluación por alcance (global, tenant, own)
+    - _Requisitos: 3.5, 3.6, 3.7_
+  - [x]* 2.7 Tests de propiedades para PermissionEvaluator
+    - **Propiedad 3: Evaluación de permisos RBAC**
+    - **Valida: Requisitos 3.5, 3.6, 3.7**
+
+- [x] 3. Checkpoint - Verificar capa de dominio
+  - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas.
+
+- [x] 4. Implementar capa de aplicación del backend
+  - [x] 4.1 Crear DTOs de aplicación
+    - Implementar DTOs con validación (class-validator): `LoginDto`, `RefreshTokenDto`, `CreateUserDto`, `AssignRoleDto`, `ToggleModuleDto`
+    - Implementar DTOs de respuesta: `AuthTokensDto`, `UserResponseDto`
+    - _Requisitos: 5.1, 3.4, 4.5_
+  - [x] 4.2 Implementar caso de uso LoginUseCase
+    - Inyectar `IUserRepository`, `IRefreshTokenRepository`, `IPasswordHasher`, `ITokenGenerator`, `IEventDispatcher`
+    - Validar credenciales sin revelar tipo de error
+    - Generar Access Token con payload (userId, tenantId, roles) y Refresh Token persistido
+    - _Requisitos: 5.1, 5.6, 5.7, 5.8_
+  - [x]* 4.3 Tests de propiedades para autenticación
+    - **Propiedad 9: Credenciales inválidas no revelan información**
+    - **Valida: Requisito 5.7**
+    - **Propiedad 10: Hashing seguro de contraseñas (round-trip)**
+    - **Valida: Requisito 5.8**
+  - [x] 4.4 Implementar caso de uso RefreshTokenUseCase
+    - Implementar rotación de refresh token (invalidar anterior, generar nuevo con mismo familyId)
+    - Implementar detección de reutilización (revocar toda la familia)
+    - _Requisitos: 5.2, 5.3, 5.5_
+  - [x]* 4.5 Tests de propiedades para refresh token
+    - **Propiedad 7: Rotación de Refresh Token**
+    - **Valida: Requisitos 5.2, 5.3**
+    - **Propiedad 8: Revocación por reutilización de Refresh Token**
+    - **Valida: Requisito 5.5**
+
+  - [x] 4.6 Implementar caso de uso LogoutUseCase
+    - Revocar todos los Refresh Tokens activos de la sesión del usuario
+    - _Requisitos: 5.4_
+  - [x] 4.7 Implementar caso de uso CreateUserUseCase
+    - Hashear contraseña con bcrypt, crear usuario con tenant_id del contexto
+    - Emitir `UserCreatedEvent`
+    - _Requisitos: 2.6, 6.3_
+  - [x] 4.8 Implementar caso de uso AssignRoleUseCase
+    - Crear relación UserRole, emitir `RoleAssignedEvent`
+    - _Requisitos: 3.4, 6.4_
+  - [x] 4.9 Implementar caso de uso ToggleModuleUseCase
+    - Activar/desactivar módulo para tenant, emitir `ModuleToggledEvent`
+    - _Requisitos: 4.5, 6.5_
+  - [x]* 4.10 Tests de propiedades para emisión de eventos
+    - **Propiedad 11: Emisión de Domain Events**
+    - **Valida: Requisitos 6.3, 6.4, 4.5**
+  - [x]* 4.11 Tests de propiedades para payload de Access Token
+    - **Propiedad 6: Payload del Access Token**
+    - **Valida: Requisito 5.6**
+
+- [x] 5. Checkpoint - Verificar capa de aplicación
+  - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas.
+
+- [x] 6. Implementar capa de infraestructura - Base de datos
+  - [x] 6.1 Configurar NestJS y TypeORM
+    - Crear proyecto NestJS en `apps/backend`
+    - Configurar TypeORM con PostgreSQL, habilitar soft deletes globales
+    - Configurar módulo de configuración con variables de entorno
+    - _Requisitos: 1.4_
+  - [x] 6.2 Crear entidades TypeORM (decoradas)
+    - Mapear entidades de dominio a entidades TypeORM con decoradores
+    - Implementar `@DeleteDateColumn` para soft deletes
+    - Implementar subscriber de auditoría centralizado para `createdAt`, `updatedAt`, `createdBy`, `updatedBy`
+    - _Requisitos: 7.1, 7.2, 7.3, 7.4, 7.6_
+  - [x]* 6.3 Tests de propiedades para auditoría y soft deletes
+    - **Propiedad 13: Campos de auditoría en operaciones CRUD**
+    - **Valida: Requisitos 7.2, 7.3**
+    - **Propiedad 14: Soft delete y exclusión en consultas**
+    - **Valida: Requisitos 7.4, 7.5**
+  - [x] 6.4 Implementar repositorios TypeORM
+    - Implementar `TypeOrmUserRepository`, `TypeOrmRoleRepository`, `TypeOrmTenantRepository`, `TypeOrmRefreshTokenRepository`, `TypeOrmModuleRepository`
+    - Todos los repositorios tenant-aware deben filtrar automáticamente por tenant_id
+    - _Requisitos: 2.4, 7.5, 10.3_
+  - [x]* 6.5 Tests de propiedades para aislamiento de tenant en repositorios
+    - **Propiedad 2: Aislamiento de datos por tenant en repositorios**
+    - **Valida: Requisitos 2.4, 2.5**
+  - [x] 6.6 Crear migraciones iniciales de base de datos
+    - Generar migraciones para todas las tablas del modelo ER
+    - _Requisitos: 2.1, 3.1, 4.1, 4.2_
+
+- [x] 7. Implementar capa de infraestructura - Auth y Guards
+  - [x] 7.1 Implementar adaptadores de autenticación
+    - Implementar `JwtTokenGenerator` (genera Access Token con payload userId, tenantId, roles)
+    - Implementar `BcryptPasswordHasher`
+    - Configurar módulo JWT con secreto y expiración
+    - _Requisitos: 5.1, 5.6, 5.8_
+  - [x] 7.2 Implementar TenantContext middleware
+    - Extraer tenant_id del header `x-tenant-id` o del JWT
+    - Validar que el tenant exista y esté activo
+    - Inyectar `TenantContext` en el request
+    - _Requisitos: 2.2_
+  - [x] 7.3 Implementar AuthGuard
+    - Validar JWT, extraer userId y tenantId
+    - Inyectar datos de usuario autenticado en el request
+    - _Requisitos: 5.1_
+  - [x] 7.4 Implementar RBACGuard con decorador @RequirePermission
+    - Leer metadata del decorador `@RequirePermission(resource, action)`
+    - Cargar permisos del usuario y evaluar con `PermissionEvaluator`
+    - _Requisitos: 3.5, 3.8_
+  - [x] 7.5 Implementar ModuleGuard con decorador @RequireModule
+    - Verificar que el módulo esté activo para el tenant del contexto
+    - _Requisitos: 4.3, 4.4_
+  - [x]* 7.6 Tests de propiedades para guard de módulo
+    - **Propiedad 4: Guard de módulo activo**
+    - **Valida: Requisitos 4.3, 4.4**
+    - **Propiedad 5: Permisos de módulo inactivo no conceden acceso**
+    - **Valida: Requisito 4.6**
+  - [x] 7.7 Implementar EventDispatcher síncrono
+    - Implementar adaptador síncrono de `IEventDispatcher`
+    - Registrar handlers para logging de eventos
+    - _Requisitos: 6.2, 6.6_
+  - [x] 7.8 Implementar filtro global de excepciones
+    - Mapear `DomainError` a respuestas HTTP estandarizadas
+    - Loguear errores inesperados y devolver 500 genérico
+    - Configurar pipe global de validación para DTOs
+    - _Requisitos: 5.7_
+
+- [x] 8. Implementar controladores HTTP y módulos NestJS
+  - [x] 8.1 Crear módulo y controlador de Auth
+    - Endpoints: `POST /auth/login`, `POST /auth/refresh`, `POST /auth/logout`
+    - Conectar con casos de uso `LoginUseCase`, `RefreshTokenUseCase`, `LogoutUseCase`
+    - _Requisitos: 5.1, 5.2, 5.4_
+  - [x] 8.2 Crear módulo y controlador de Users
+    - Endpoints: `POST /users`, `GET /users`, `GET /users/:id`, `PUT /users/:id`, `DELETE /users/:id`
+    - Aplicar decoradores `@RequirePermission` y guards
+    - _Requisitos: 2.6, 3.8_
+  - [x] 8.3 Crear módulo y controlador de Roles
+    - Endpoints: `POST /roles`, `GET /roles`, `POST /roles/:id/permissions`, `POST /users/:id/roles`
+    - Conectar con `AssignRoleUseCase`
+    - _Requisitos: 3.4, 3.8_
+  - [x] 8.4 Crear módulo y controlador de Tenants
+    - Endpoints: `POST /tenants`, `GET /tenants`, `PUT /tenants/:id`
+    - _Requisitos: 2.1_
+  - [x] 8.5 Crear módulo y controlador de Module Management
+    - Endpoints: `POST /modules/:id/toggle`, `GET /modules`, `GET /tenants/:id/modules`
+    - Conectar con `ToggleModuleUseCase`
+    - _Requisitos: 4.3, 4.5_
+  - [x] 8.6 Registrar todos los módulos en AppModule con inyección de dependencias
+    - Configurar providers con tokens de inyección para puertos de dominio
+    - Registrar guards globales, middleware y filtro de excepciones
+    - _Requisitos: 1.6_
+  - [x]* 8.7 Tests unitarios de integración de controladores
+    - Verificar flujo completo de autenticación (login → refresh → logout)
+    - Verificar flujo de autorización (crear usuario → asignar rol → verificar acceso)
+    - Verificar aislamiento de tenant en endpoints
+    - _Requisitos: 2.5, 5.1, 3.5_
+
+- [x] 9. Checkpoint - Verificar backend completo
+  - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas.
+
+- [x] 10. Implementar frontend - Infraestructura base
+  - [x] 10.1 Configurar proyecto Next.js con App Router
+    - Crear proyecto en `apps/frontend` con TypeScript
+    - Configurar referencia a `@core/types`
+    - _Requisitos: 9.1_
+  - [x] 10.2 Implementar cliente HTTP tipado
+    - Crear `HttpClient` con métodos `get`, `post`, `put`, `delete` tipados con contratos de `@core/types`
+    - Implementar interceptor de refresh automático (capturar 401, renovar token, reintentar)
+    - Inyectar header `x-tenant-id` automáticamente
+    - _Requisitos: 9.1, 9.2_
+  - [x]* 10.3 Tests de propiedades para interceptor de refresh
+    - **Propiedad 15: Interceptor de refresh en frontend**
+    - **Valida: Requisito 9.2**
+  - [x] 10.4 Implementar contexto global de usuario y autenticación
+    - Crear `AuthContext` con estado de usuario, tokens y funciones de login/logout
+    - Persistir tokens de forma segura
+    - _Requisitos: 9.3_
+
+- [x] 11. Implementar frontend - Sistema de permisos y módulos
+  - [x] 11.1 Implementar sistema reactivo de permisos
+    - Crear `PermissionContext` con `hasPermission(resource, action)` e `isModuleActive(moduleId)`
+    - Crear componente `PermissionGate` para renderizado condicional
+    - _Requisitos: 9.4_
+  - [x]* 11.2 Tests de propiedades para sistema de permisos
+    - **Propiedad 16: Sistema reactivo de permisos en frontend**
+    - **Valida: Requisito 9.4**
+  - [x] 11.3 Implementar renderizado dinámico de módulos
+    - Crear componente `ModuleGate` que renderiza solo si el módulo está activo para el tenant
+    - _Requisitos: 9.6_
+  - [x]* 11.4 Tests de propiedades para renderizado de módulos
+    - **Propiedad 17: Renderizado condicional de módulos**
+    - **Valida: Requisito 9.6**
+  - [x] 11.5 Implementar middleware de protección de rutas
+    - Crear middleware Next.js que verifica autenticación y permisos antes de renderizar rutas protegidas
+    - Redirigir a página de acceso denegado si no tiene permisos
+    - _Requisitos: 9.5_
+  - [x] 11.6 Implementar selector de tenant
+    - Crear componente de selección de tenant para usuarios con acceso a múltiples tenants
+    - Actualizar contexto global al cambiar de tenant
+    - _Requisitos: 9.7_
+
+- [x] 12. Checkpoint - Verificar frontend completo
+  - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas.
+
+- [x] 13. Integración final y validación
+  - [x] 13.1 Verificar contratos compartidos entre frontend y backend
+    - Asegurar que todos los endpoints del backend usan los tipos de `@core/types`
+    - Asegurar que el cliente HTTP del frontend usa los mismos contratos
+    - Verificar detección de incompatibilidades en compilación
+    - _Requisitos: 8.3, 8.7_
+  - [x]* 13.2 Tests de propiedades para tenant_id invariante
+    - **Propiedad 1: Invariante de tenant_id en entidades**
+    - **Valida: Requisitos 2.3, 2.6**
+  - [x]* 13.3 Tests unitarios de integración end-to-end
+    - Verificar flujo completo: crear tenant → crear usuario → login → asignar rol → acceder recurso protegido
+    - Verificar aislamiento: usuario de tenant A no puede acceder datos de tenant B
+    - Verificar módulos: desactivar módulo → verificar que permisos del módulo no conceden acceso
+    - _Requisitos: 2.5, 3.5, 4.6_
+
+- [x] 14. Checkpoint final - Verificar sistema completo
+  - Asegurar que todos los tests pasan, preguntar al usuario si surgen dudas.
+
+## Notas
+
+- Las tareas marcadas con `*` son opcionales y pueden omitirse para un MVP más rápido
+- Cada tarea referencia requisitos específicos para trazabilidad
+- Los checkpoints aseguran validación incremental
+- Los tests de propiedades validan correctitud universal (fast-check, mínimo 100 iteraciones)
+- Los tests unitarios validan ejemplos específicos y edge cases (Jest)
+- El paquete `@core/types` debe compilar antes de iniciar backend o frontend
+- Las migraciones de BD deben ejecutarse antes de los tests de integración

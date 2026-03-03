@@ -1,0 +1,207 @@
+/* ============================================
+   Design Tokens — Ancient Tech Aesthetic
+   Inspired by monumental alien architecture:
+   dark metallic surfaces, luminous cyan accents,
+   geometric precision, energy-glow effects.
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+:root {
+  /* Core palette — dark metallic with cyan energy */
+  --color-bg-primary: #080c12;
+  --color-bg-secondary: #0d1117;
+  --color-bg-tertiary: #151b25;
+  --color-surface: #111820;
+  --color-surface-elevated: #1a2230;
+  --color-border: #1e2a3a;
+  --color-border-glow: rgba(0, 210, 255, 0.15);
+
+  /* Text */
+  --color-text-primary: #d0dae8;
+  --color-text-secondary: #7a8da4;
+  --color-text-muted: #4a5a6e;
+
+  /* Accent — luminous cyan energy */
+  --color-accent: #00d2ff;
+  --color-accent-hover: #33ddff;
+  --color-accent-dim: #0099bb;
+  --color-accent-light: rgba(0, 210, 255, 0.08);
+  --color-accent-glow: 0 0 12px rgba(0, 210, 255, 0.3);
+  --color-accent-glow-strong: 0 0 20px rgba(0, 210, 255, 0.5), 0 0 40px rgba(0, 210, 255, 0.15);
+
+  /* Semantic */
+  --color-success: #00e5a0;
+  --color-success-light: rgba(0, 229, 160, 0.1);
+  --color-error: #ff4060;
+  --color-error-light: rgba(255, 64, 96, 0.1);
+  --color-warning: #ffb020;
+  --color-warning-light: rgba(255, 176, 32, 0.1);
+  --color-info: #00aaff;
+  --color-info-light: rgba(0, 170, 255, 0.1);
+  --color-neutral: #5a6a7e;
+  --color-neutral-light: rgba(90, 106, 126, 0.15);
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+
+  /* Typography — geometric, angular */
+  --font-family: 'Rajdhani', 'Segoe UI', system-ui, sans-serif;
+  --font-family-mono: 'Share Tech Mono', 'Consolas', monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.25rem;
+  --font-size-2xl: 1.5rem;
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --line-height-tight: 1.25;
+  --line-height-normal: 1.5;
+  --letter-spacing-wide: 0.05em;
+  --letter-spacing-wider: 0.1em;
+
+  /* Borders — angular, not rounded */
+  --radius-sm: 2px;
+  --radius-md: 3px;
+  --radius-lg: 4px;
+  --radius-full: 2px;
+
+  /* Shadows — dark with cyan tint */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.4), 0 0 1px rgba(0, 210, 255, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5), 0 0 2px rgba(0, 210, 255, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 4px rgba(0, 210, 255, 0.1);
+
+  /* Transitions */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-glow: 300ms ease;
+
+  /* Layout */
+  --sidebar-width: 16rem;
+  --header-height: 3.5rem;
+}
+
+/* ============================================
+   Light mode — controlled via data-theme attribute
+   ============================================ */
+
+[data-theme='light'] {
+  --color-bg-primary: #f0f2f5;
+  --color-bg-secondary: #f7f8fa;
+  --color-bg-tertiary: #e8ecf1;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-border: #d0d7e0;
+  --color-border-glow: rgba(0, 150, 200, 0.2);
+  --color-text-primary: #1a2030;
+  --color-text-secondary: #5a6578;
+  --color-text-muted: #8a95a8;
+  --color-accent: #0090cc;
+  --color-accent-hover: #00a8e8;
+  --color-accent-dim: #006e99;
+  --color-accent-light: rgba(0, 144, 204, 0.08);
+  --color-accent-glow: 0 0 8px rgba(0, 144, 204, 0.2);
+  --color-accent-glow-strong: 0 0 16px rgba(0, 144, 204, 0.3);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* ============================================
+   CSS Reset
+   ============================================ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 100%;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  font-size: var(--font-size-md);
+  line-height: var(--line-height-normal);
+  color: var(--color-text-primary);
+  background-color: var(--color-bg-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+ul,
+ol {
+  list-style: none;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-family);
+  font-weight: var(--font-weight-semibold);
+  line-height: var(--line-height-tight);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-primary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent-dim);
+}
+
+/* Selection */
+::selection {
+  background-color: rgba(0, 210, 255, 0.25);
+  color: #fff;
+}

@@ -1,0 +1,73 @@
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: var(--space-md);
+  background-color: var(--color-bg-primary);
+  background-image:
+    radial-gradient(ellipse at 50% 0%, rgba(0, 210, 255, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 50% 100%, rgba(0, 210, 255, 0.02) 0%, transparent 50%);
+}
+
+.card {
+  width: 100%;
+  max-width: 24rem;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-lg), 0 -2px 20px rgba(0, 210, 255, 0.08);
+  padding: var(--space-2xl);
+  position: relative;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: -1px;
+  left: 20%;
+  right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-accent), transparent);
+  opacity: 0.6;
+}
+
+.logo {
+  text-align: center;
+  margin-bottom: var(--space-xl);
+}
+
+.logoText {
+  font-family: var(--font-family);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-shadow: 0 0 20px rgba(0, 210, 255, 0.3);
+}
+
+.subtitle {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-sm);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.error {
+  padding: var(--space-sm) var(--space-md);
+  background-color: var(--color-error-light);
+  color: var(--color-error);
+  border: 1px solid rgba(255, 64, 96, 0.2);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  text-align: center;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "axion-core",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Axion Core — plataforma multi-tenant empresarial",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "build:types": "npm run build --workspace=packages/core-types",
+    "build:backend": "npm run build --workspace=apps/backend",
+    "build:frontend": "npm run build --workspace=apps/frontend",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "ts-node": "^10.9.2"
+  }
+}

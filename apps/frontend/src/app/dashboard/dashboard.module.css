@@ -1,0 +1,42 @@
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  margin-bottom: var(--space-xl);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(0, 210, 255, 0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: var(--space-lg);
+}
+
+.statValue {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  margin-bottom: var(--space-xs);
+  text-shadow: 0 0 12px rgba(0, 210, 255, 0.3);
+}
+
+.statLabel {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.errorCard {
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.errorMsg {
+  color: var(--color-error);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-sm);
+}

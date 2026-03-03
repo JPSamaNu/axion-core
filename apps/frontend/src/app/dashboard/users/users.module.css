@@ -1,0 +1,46 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+}
+
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(0, 210, 255, 0.2);
+}
+
+.formGrid {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.roles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-xs);
+}
+
+.errorMsg {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-xl);
+}
+
+.confirmText {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  margin-bottom: var(--space-md);
+}
+
+.footerActions {
+  display: flex;
+  gap: var(--space-sm);
+  justify-content: flex-end;
+}

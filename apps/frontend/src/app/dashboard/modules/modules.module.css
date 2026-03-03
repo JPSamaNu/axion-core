@@ -1,0 +1,104 @@
+.title {
+  font-size: var(--font-size-2xl);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-accent);
+  margin-bottom: var(--space-xl);
+  letter-spacing: var(--letter-spacing-wider);
+  text-transform: uppercase;
+  text-shadow: 0 0 16px rgba(0, 210, 255, 0.2);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(18rem, 1fr));
+  gap: var(--space-lg);
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-sm);
+}
+
+.moduleName {
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  letter-spacing: var(--letter-spacing-wide);
+  text-transform: uppercase;
+}
+
+.moduleDesc {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  line-height: var(--line-height-normal);
+}
+
+.coreLabel {
+  font-family: var(--font-family-mono);
+  font-size: var(--font-size-xs);
+  color: var(--color-accent-dim);
+  margin-top: var(--space-xs);
+  letter-spacing: var(--letter-spacing-wide);
+}
+
+/* Toggle switch — energy style */
+.toggle {
+  position: relative;
+  width: 2.75rem;
+  height: 1.5rem;
+  flex-shrink: 0;
+}
+
+.toggleInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-bg-tertiary);
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: background-color var(--transition-fast), border-color var(--transition-glow), box-shadow var(--transition-glow);
+}
+
+.toggleSlider::before {
+  content: '';
+  position: absolute;
+  width: 1.125rem;
+  height: 1.125rem;
+  left: 0.1875rem;
+  bottom: 0.1875rem;
+  background-color: var(--color-text-muted);
+  border-radius: 50%;
+  transition: transform var(--transition-fast), background-color var(--transition-fast), box-shadow var(--transition-glow);
+}
+
+.toggleInput:checked + .toggleSlider {
+  background-color: rgba(0, 210, 255, 0.15);
+  border-color: var(--color-accent);
+  box-shadow: 0 0 8px rgba(0, 210, 255, 0.2);
+}
+
+.toggleInput:checked + .toggleSlider::before {
+  transform: translateX(1.25rem);
+  background-color: var(--color-accent);
+  box-shadow: 0 0 6px rgba(0, 210, 255, 0.5);
+}
+
+.toggleInput:disabled + .toggleSlider {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.errorMsg {
+  color: var(--color-error);
+  font-size: var(--font-size-sm);
+  text-align: center;
+  padding: var(--space-xl);
+}
